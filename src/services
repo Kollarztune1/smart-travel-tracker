@@ -5,7 +5,7 @@ dotenv.config();
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const EXCHANGE_RATE_API_KEY = process.env.EXCHANGE_RATE_API_KEY;
 
-// Helper function to get location details from Google Places API
+
 const getLocationDetails = async (location) => {
     const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
         location
@@ -14,16 +14,16 @@ const getLocationDetails = async (location) => {
     try {
         const response = await axios.get(url);
         if (response.data.results.length > 0) {
-            return response.data.results[0].formatted_address; // Correct extraction
+            return response.data.results[0].formatted_address; 
         }
     } catch (error) {
         console.error("Google Places API Error:", error.response?.data || error.message);
     }
-    return location; // Fallback to original if no result
+    return location;
 };
 
 
-// Helper function to convert time zones
+
 const getTimeZone = async (location) => {
     const url = `https://maps.googleapis.com/maps/api/timezone/json?location=${encodeURIComponent(
         location
@@ -31,7 +31,7 @@ const getTimeZone = async (location) => {
 
     try {
         const response = await axios.get(url);
-        return response.data.timeZoneId || "UTC"; // Fallback to UTC
+        return response.data.timeZoneId || "UTC"; 
     } catch (error) {
         console.error("Google Time Zone API Error:", error.response?.data || error.message);
         return "UTC";
@@ -44,7 +44,7 @@ const convertTimeZone = async (time, location) => {
 };
 
 
-// Helper function to convert currency
+
 const convertCurrency = async (amount, from = "EUR", to = "USD") => {
     try {
         const url = `https://v6.exchangerate-api.com/v6/${EXCHANGE_RATE_API_KEY}/latest/${from}`;
@@ -59,14 +59,14 @@ const convertCurrency = async (amount, from = "EUR", to = "USD") => {
         return `${amount} ${from} 💱 (${amount} ${from} ≈ ${convertedAmount} ${to})`;
     } catch (error) {
         console.error("Exchange Rate API Error:", error.response?.data || error.message);
-        return `${amount} ${from}`; // Fallback
+        return `${amount} ${from}`; 
     }
 };
 
 const modifyMessage = async (message) => {
     let modifiedMessage = message;
 
-    // Extract location using regex (detects places after "flying to" or "going to")
+    
     const locationMatch = message.match(/\b(?:flying to|going to) ([A-Za-z\s]+)/i);
     if (locationMatch) {
         const location = locationMatch[1].trim();
@@ -76,7 +76,7 @@ const modifyMessage = async (message) => {
         }
     }
 
-    // Extract time (basic regex, can be improved)
+    
     const timeMatch = message.match(/(\d{1,2} (AM|PM) [A-Z]+)/);
     if (timeMatch) {
         const timeString = timeMatch[0];
@@ -84,7 +84,7 @@ const modifyMessage = async (message) => {
         modifiedMessage = modifiedMessage.replace(timeString, adjustedTime);
     }
 
-    // Extract currency and convert it
+    
     const currencyMatch = message.match(/(\d+) EUR/);
     if (currencyMatch) {
         const amount = parseFloat(currencyMatch[1]);
