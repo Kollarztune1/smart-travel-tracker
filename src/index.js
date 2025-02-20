@@ -10,7 +10,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 10000;
 
 
-
+ 
  
 const detectLocation = async (text) => {
   const API_KEY = process.env.GOOGLE_PLACES_API_KEY;
@@ -32,7 +32,6 @@ const convertTimeZone = async (time, location) => {
   const API_KEY = process.env.TIMEZONE_API_KEY;
   const url = `https://timeapi.io/api/Time/current/zone?timezone=${encodeURIComponent(location)}`;
 
-
   try {
     const { data } = await axios.get(url);
     return `${time} in ${location} is ${data.datetime}`;
@@ -43,7 +42,7 @@ const convertTimeZone = async (time, location) => {
 };
 
 
-
+ 
  
 const convertCurrency = async (amount, from, to = "USD") => {
   const API_KEY = process.env.EXCHANGE_RATE_API_KEY;
@@ -61,9 +60,11 @@ const convertCurrency = async (amount, from, to = "USD") => {
 
 
  
-
+ 
 app.post("/modify-message", async (req, res) => {
   try {
+    console.log("Received request:", req.body);  
+
     const { message } = req.body;
     let modifiedMessage = message;
 
@@ -93,3 +94,22 @@ app.post("/modify-message", async (req, res) => {
 
 
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
