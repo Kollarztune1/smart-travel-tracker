@@ -61,19 +61,28 @@ const convertTimeZone = async (time, location) => {
 
  
  
-const convertCurrency = async (amount, from, to = "USD") => {
+const convertCurrency = async (amount, from, to = "EUR") => {
   const API_KEY = process.env.EXCHANGE_RATE_API_KEY;
   const url = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/${from}`;
 
   try {
-    const { data } = await axios.get(url);
-    const rate = data.conversion_rates[to];
-    return `${amount} ${from} ≈ ${(amount * rate).toFixed(2)} ${to}`;
+      const { data } = await axios.get(url);
+      console.log("📊 Exchange Rate API Response:", JSON.stringify(data, null, 2));
+
+      // Check if the conversion rate exists
+      if (!data.conversion_rates || !data.conversion_rates[to]) {
+          console.error("❌ Invalid conversion data:", data);
+          return `${amount} ${from} (Conversion failed)`;
+      }
+
+      const rate = data.conversion_rates[to];
+      return `${amount} ${from} ≈ ${(amount * rate).toFixed(2)} ${to}`;
   } catch (error) {
-    console.error("❌ Currency Conversion Error:", error.message);
-    return `${amount} ${from}`;
+      console.error("❌ Currency Conversion Error:", error.message);
+      return `${amount} ${from} (Error)`;
   }
 };
+
 
 app.get("/telex/auth", (req, res) => {
   const apiKey = req.query.api_key;
