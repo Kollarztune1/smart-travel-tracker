@@ -25,12 +25,22 @@ const detectLocation = async (text) => {
 
   try {
     const { data } = await axios.get(url);
-    return data.predictions.length > 0 ? data.predictions[0].description : null;
+    if (data.predictions.length > 0) {
+      const fullLocation = data.predictions[0].description;
+
+      
+      const locationParts = fullLocation.split(",").map(part => part.trim());
+      const filteredLocation = locationParts.slice(-2).join(", "); 
+
+      return filteredLocation; 
+    }
+    return null;
   } catch (error) {
     console.error("❌ Location Detection Error:", error.message);
     return null;
   }
 };
+
 
 
  
@@ -84,24 +94,24 @@ app.post("/telex/webhook", (req, res) => {
   res.status(200).json({ message: "Webhook received successfully!" });
 });
 
- 
 app.post("/modify-message", async (req, res) => {
   try {
-    console.log("Received request:", req.body);  
+    console.log(`📩 Received ${req.method} request at ${req.url}`);
+    console.log("📄 Request body:", req.body);
 
     const { message } = req.body;
-    let modifiedMessage = message;
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" });
+    }
 
-    
+    let modifiedMessage = message;
     const location = await detectLocation(message);
     if (location) modifiedMessage += ` 📍 (${location})`;
 
-    
     if (message.match(/\d{1,2}\s?(AM|PM)\s?[A-Z]{2,}/)) {
       modifiedMessage += ` 🕒 (Time Zone Adjusted)`;
     }
 
-    
     const currencyMatch = message.match(/(\d+)\s?(USD|EUR|GBP)/);
     if (currencyMatch) {
       const [_, amount, currency] = currencyMatch;
@@ -115,6 +125,7 @@ app.post("/modify-message", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
