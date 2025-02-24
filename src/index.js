@@ -1,15 +1,22 @@
 import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import { integrationSpec } from "./integrationspec.js";
+import cors from "cors";
+
+
 
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 
 
-
+app.get("/telex/spec", (req, res) => {
+  res.json(integrationSpec);
+});
  
  
 const detectLocation = async (text) => {
@@ -58,8 +65,25 @@ const convertCurrency = async (amount, from, to = "USD") => {
   }
 };
 
+app.get("/telex/auth", (req, res) => {
+  const apiKey = req.query.api_key;
+  if (!apiKey) {
+      return res.status(400).json({ error: "Missing API Key" });
+  }
 
- 
+  
+  process.env.TELEX_API_KEY = apiKey;
+
+  res.json({ message: "Telex authentication successful!", apiKey });
+});
+
+app.post("/telex/webhook", (req, res) => {
+  console.log("🔔 Received Telex Webhook:", req.body);
+  
+  
+  res.status(200).json({ message: "Webhook received successfully!" });
+});
+
  
 app.post("/modify-message", async (req, res) => {
   try {
